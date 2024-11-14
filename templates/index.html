@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 데이터</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div style="padding: 20px; background-color: dodgerblue" >
+    <h1 style="padding-left: 20px; text-decoration-color: white">StoreArt-Copy</h1>
+</div>
+<div style="padding: 5%">
+    {% if data %}
+        <h1>검색어 : {{ data.result.searchKeyword }}</h1>
+        <p>기준시간 : {{ data.result.searchTime }}</p>
+    {% endif %}
+</div>
+<div style="padding-left: 3%; padding-right: 3%; padding-top: 2%; padding-bottom: 2%;">
+    <form id="searchForm" method="POST" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="input-group mb-3" style="flex: 1;">
+            <!-- 정렬 옵션 -->
+            <select id="sort" name="sort" onchange="submitForm()" style="margin-left: 10px;">
+                <option value="a" {% if selected_sort == 'a' or selected_sort is none %}selected{% endif %}>랭킹순</option>
+                <option value="b" {% if selected_sort == 'b' %}selected{% endif %}>판매가순</option>
+                <option value="c" {% if selected_sort == 'c' %}selected{% endif %}>클릭순</option>
+                <option value="d" {% if selected_sort == 'd' %}selected{% endif %}>연관순</option>
+            </select>
+
+            <input type="text" class="form-control" placeholder="검색어" aria-label="Recipient's username" aria-describedby="button-addon2" id="keyword" name="keyword" value="{{ data.result.searchKeyword if data and data.result and data.result.searchKeyword else '' }}">
+            <button class="btn btn-outline-secondary" type="submit">검색</button>
+        </div>
+    </form>
+</div>
+
+
+
+{% if data %}
+    <div class="flex justify-center">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <td>순위</td>
+                <td>상품명</td>
+                <td>스토어명</td>
+                <td>판매가</td>
+                <td>찜수</td>
+                <td>리뷰수</td>
+                <td>클릭점수</td>
+                <td>판매점수</td>
+                <td>리뷰점수</td>
+                <td>품질점수</td>
+                <td>연관성</td>
+                <td>유사성</td>
+                <td>최신성</td>
+                <td>하락위험</td>
+                <td>신뢰도</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in data.result.products %}
+                <tr>
+                    <td>{{ product.rank }}</td>
+                    <td><a href="{{ product.link }}" target="_blank" rel="noopener noreferrer">{{ product.productTitle }}</a></td>
+                    <td>{{ product.mallName }}</td>
+                    <td>{{ product.lowPrice }}</td>
+                    <td>{{ product.keepCnt }}</td>
+                    <td>{{ product.reviewCount }}</td>
+                    <td>{{ product.hitStarScore }}</td>
+                    <td>{{ product.saleStarScore }}</td>
+                    <td>{{ product.reviewCountStarScore }}</td>
+                    <td>{{ product.qualityStarScore }}</td>
+                    <td>{{ product.relevanceStarScore }}</td>
+                    <td>{{ product.similarityStarScore }}</td>
+                    <td>{{ product.recentStarScore }}</td>
+                    <td>{{ product.rankDownScoreType }}</td>
+                    <td>{{ product.reliabilityType }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+
+
+{% endif %}
+
+<script>
+    function submitForm() {
+        document.getElementById("searchForm").submit();
+    }
+</script>
+</body>
+</html>
