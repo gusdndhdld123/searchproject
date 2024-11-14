@@ -16,8 +16,6 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from flask_cors import CORS
 import datetime
 import math
-import threading
-import time
 app = Flask(__name__)
 CORS(app, origins="*")
 
@@ -83,7 +81,7 @@ def get_search_data(keyword):
         driver.execute_script("window.open('');")
     driver.switch_to.window(driver.window_handles[2])
     driver.get(f"https://sell.smartstore.naver.com/api/product/shared/product-search-popular?_action=productSearchPopularByKeyword&keyword={keyword}")
-    time.sleep(1)
+
     app.logger.info('검색창 열림')
     page_source = driver.page_source
     start_index = page_source.find("{")
@@ -111,6 +109,10 @@ def api(keyword):
     if driver is None:
         initialize_driver()
 
+    # API 요청에 대해 별도 쓰레드로 처리
+    thread = threading.Thread(target=get_search_data, args=(keyword,))
+    thread.start()
+    thread.join()  # 필요시 join() 사용해 대기
     data = get_search_data(keyword)
 
     return jsonify(data)
@@ -119,8 +121,13 @@ def scheduled_task():
     """주기적으로 실행할 작업."""
     app.logger.info('스케줄러 작업 실행 중...')
     keyword = "example"  # 예시로 사용할 키워드
-    data = get_search_data(keyword)
-    app.logger.info(f"검색된 데이터: {data}")
+
+    # 스케줄 작업을 쓰레드로 비동기 처리
+    thread = threading.Thread(target=get_search_data, args=(keyword,))
+    thread.start()
+
+    # 쓰레드 종료 후 데이터 처리 로그
+    app.logger.info("검색된 데이터가 스레드에서 처리되었습니다.")
 
 def handle_job_event(event):
     """작업 완료 후 로그 처리."""
@@ -140,17 +147,3 @@ if __name__ == '__main__':
 
     # Flask 서버 실행, use_reloader=False로 설정하여 두 번 실행되지 않도록 방지
     app.run(debug=False, use_reloader=False)
-    def print_second():
-        now = time.strftime('%H:%M:%S')
-
-
-    time_laps = 0
-    start_time = time.time()				# 시작 시간 저장
-    # 현재 시간
-    time_laps = math.floor(time.time() - start_time)    # 경과 시간 계산(소수점버림)
-    print(f' : {time_laps}초 경과')
-    threading.Timer(2,print_second).start()             # x초 마다 반복
-    pass
-
-
-    print_second()
