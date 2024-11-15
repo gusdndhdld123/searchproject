@@ -221,4 +221,4 @@ if __name__ == '__main__':
     # scheduler.start()
     initialize_app()  # 서버 시작 시 한 번 초기화 함수 실행
     # Flask 서버 실행, use_reloader=False로 설정하여 두 번 실행되지 않도록 방지
-    app.run(debug=False, use_reloader=False)
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5000)
